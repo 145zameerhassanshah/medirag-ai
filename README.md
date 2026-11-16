@@ -1,196 +1,311 @@
-# MediRAG AI — Real RAG Backend + Next.js Connected Workspace (Alpha)
 
-This is a **runnable development-alpha starter**, not a finished production SaaS. It combines the existing UI-preview app with a new authenticated `/live` workspace and a Python FastAPI backend. It does not modify the old Day 1–4 clinical project.
+# MediRAG AI — Dynamic RAG Chatbot Platform
 
-## Implemented and functional when dependencies/provider keys are configured
+A full-stack, multi-organization Retrieval-Augmented Generation (RAG) chatbot application built with Next.js, FastAPI, SQLAlchemy, ChromaDB, Sentence Transformers, and configurable large language model APIs.
 
-- Owner account registration/login (JWT, Argon2 password hashing)
-- Multiple owner-scoped company profiles (description, industry, contact, address, hours, policies)
-- Company-scoped knowledgebases and chatbot records
-- Upload/index digital PDF, DOCX, TXT, Markdown; citation source metadata includes PDF page and heuristic heading (if present)
-- Sentence Transformers embeddings and locally persisted ChromaDB cosine search
-- Structured product catalogues indexed as searchable text; add and delete
-- Company profile sync into a chosen knowledgebase
-- Retrieval threshold + unsupported-evidence fallback
-- Real LLM generation via configurable Gemini **or** OpenAI server-side API key
-- Server-side check that citations reference retrieved IDs (NOT a guarantee of clinical faithfulness)
-- Conversation persistence and retrieval in SQL database
-- Responsive Next.js `/live` workspace for real CRUD and chat
-- Existing UI preview retained on `/dashboard` and other original pages
+MediRAG AI allows organizations to manage knowledgebases, upload documents, configure AI assistants, and ask questions grounded in their own information.
 
-## Not completed (required before production/client deployment)
+The initial research use case focuses on clinical guidelines and evidence-based medical question answering.
 
-**Do not call the alpha production-ready.** Missing: team roles / invites / RBAC, secure HttpOnly session cookies and CSRF protection, email verification, password recovery, rate limiting, upload virus scanning, advanced file validation, audit logs, asynchronous indexing queue, OCR for scanned PDFs, rigorous citation/claim verification, model safety evaluation, source access endpoint / citation click-through, billing, subscription enforcement, customer-facing widget and public-safe API, role-based super admin, background jobs, observability, backups, privacy compliance and infrastructure-hardening. Only the signed-in **company owner** can access its resources; secure shared teams are not yet implemented. Only upload non-sensitive, authorized documents.
+## Features
 
-## Folder layout
+- User registration and authentication
+- Organization and company profile management
+- Knowledgebase creation
+- PDF, DOCX, TXT, and Markdown document ingestion
+- Automatic text extraction and chunking
+- Local embedding generation using Sentence Transformers
+- ChromaDB vector storage and similarity search
+- Configurable Gemini or OpenAI answer generation
+- Source citations with document, page, and section metadata
+- Relevance filtering and unsupported-answer fallback
+- Empty-query validation
+- Product catalogue management
+- Saved chat conversations and messages
+- Responsive Next.js admin workspace
+
+## Technology Stack
+
+### Frontend
+- Next.js
+- React
+- TypeScript
+- Responsive CSS
+
+### Backend
+- Python
+- FastAPI
+- Pydantic
+- SQLAlchemy
+- JWT authentication
+
+### AI and Retrieval
+- Sentence Transformers
+- ChromaDB
+- Cosine similarity search
+- Google Gemini or OpenAI API
+- PyMuPDF for PDF extraction
+
+### Storage
+- SQLite for local development
+- ChromaDB for vector embeddings
+- Local document storage
+
+PostgreSQL, production object storage, and additional access controls are planned improvements.
+
+## RAG Architecture
+
+```text
+User Question
+     |
+     v
+Next.js Chat Interface
+     |
+     v
+FastAPI Backend
+     |
+     v
+Input Validation
+     |
+     v
+Question Embedding
+     |
+     v
+ChromaDB Similarity Search
+     |
+     v
+Relevance Filtering
+     |
+     v
+Retrieved Document Context
+     |
+     v
+Gemini / OpenAI
+     |
+     v
+Source-Grounded Answer
+     |
+     v
+Citations + Chat History
+```
+
+## Project Structure
 
 ```text
 medirag_fullstack/
-  backend/
-    main.py                # FastAPI routes, SQL models, ingestion, retrieval, generation
-    requirements.txt
-    .env.example
-  frontend/
-    src/app/live/page.tsx  # Real API-connected workspace
-    src/components/Workbench.tsx # Original demo screens, link to /live
-    package.json
-    .env.example
+|
+|-- backend/
+|   |-- main.py
+|   |-- requirements.txt
+|   |-- .env.example
+|   |-- storage/           # Local data; excluded from Git
+|
+|-- frontend/
+|   |-- src/
+|   |   |-- app/
+|   |-- package.json
+|   |-- .env.example
+|
+|-- README.md
+|-- .gitignore
 ```
 
-## Windows install — backend
+## Local Installation
 
-Open a **new terminal** in `medirag_fullstack/backend`:
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/YOUR_USERNAME/medirag-ai.git
+cd medirag-ai
+```
+
+### 2. Configure the Backend
+
+Recommended Python version: 3.12.
+
+On Windows PowerShell:
 
 ```powershell
-py -3.12 -m venv .venv
+cd backend
+
+python -m venv .venv
+
 .\.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
+
 python -m pip install -r requirements.txt
+```
+
+Create the environment configuration:
+
+```powershell
 Copy-Item .env.example .env
 ```
 
-Python 3.12 is a *recommended* compatibility target for the ML stack; it is okay to use 3.11 if installed. Your existing Python 3.14 virtual environment is not changed. Do not overwrite the Day 1–4 project's `.venv`.
+Configure the required variables:
 
-Generate a secret using:
+```env
+DATABASE_URL=sqlite:///./medirag.db
+
+JWT_SECRET=GENERATE_A_LONG_RANDOM_SECRET
+
+LLM_PROVIDER=gemini
+GEMINI_API_KEY=YOUR_PRIVATE_API_KEY
+GEMINI_MODEL=gemini-2.5-flash
+
+EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
+
+MIN_SIMILARITY=0.45
+
+CORS_ORIGINS=http://localhost:3000
+```
+
+Generate a JWT secret:
 
 ```powershell
 python -c "import secrets; print(secrets.token_urlsafe(48))"
 ```
 
-Edit `backend/.env`:
+Copy the generated secret into `backend/.env`.
 
-```env
-JWT_SECRET=<paste-the-generated-secret>
-LLM_PROVIDER=gemini
-GEMINI_API_KEY=<your-own-provider-API-key>
-GEMINI_MODEL=gemini-2.5-flash
-```
+Never commit API keys or `.env` files to GitHub.
 
-Or use `LLM_PROVIDER=openai`, `OPENAI_API_KEY`, `OPENAI_MODEL` instead. Choose a model to which your provider account has access. No API keys are supplied or included in this package. API provider charges/free usage depend on the provider and plan. Use `LLM_PROVIDER=none` to test indexing and retrieval setup; grounded answer generation will then return a clear unavailable status.
-
-**Important:** The first embedding run downloads `sentence-transformers/all-MiniLM-L6-v2`. If your C: drive is full, set Hugging Face cache before starting:
-
-```powershell
-$env:HF_HOME = "D:\huggingface_cache"
-$env:HF_HUB_CACHE = "D:\huggingface_cache\hub"
-```
-
-Start:
+### 3. Start the Backend
 
 ```powershell
 python -m uvicorn main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-Verify in browser: http://127.0.0.1:8000/docs and http://127.0.0.1:8000/health
+Backend API documentation:
 
-For **local development only**, SQLite is the default database (`backend/medirag.db`) and ChromaDB persists under `backend/storage/chroma`. To use a PostgreSQL server later, configure `DATABASE_URL=postgresql+psycopg://...` and install `psycopg[binary]`, plus proper schema migrations/backups.
+http://127.0.0.1:8000/docs
 
-## Windows install — frontend
+Health endpoint:
 
-Open **another terminal** inside `medirag_fullstack/frontend`:
+http://127.0.0.1:8000/health
+
+### 4. Configure the Frontend
+
+Open another terminal:
 
 ```powershell
+cd frontend
+
 npm install
+
 Copy-Item .env.example .env.local
-```
 
-Make sure `.env.local` contains:
-
-```env
-NEXT_PUBLIC_RAG_API_BASE_URL=http://127.0.0.1:8000
-```
-
-Start:
-
-```powershell
 npm run dev
 ```
 
-Open:
-- http://localhost:3000/live — **REAL connected workspace**, with account sign-in and actual backend operations
-- http://localhost:3000/dashboard — earlier **local demo UI** (does not sync with API)
+Frontend:
 
-Do not use `/playground` for live testing: the original prototype sends different demo IDs and is not authenticated. Use **`/live` → `Live Chat`** instead. The UI demo's super-admin switch does **not** grant actual super-admin authority.
+http://localhost:3000/live
 
-## End-to-end test flow
+## Usage
 
-1. Register owner account using a testing email and long password.
-2. Create a Company profile (e.g., an approved fictional demo business), save policies/hours.
+1. Register or sign in.
+2. Create an organization/company profile.
 3. Create a knowledgebase.
-4. Click **Sync profile** so the company profile is included in search.
-5. Add product catalogue entries if testing commerce.
-6. Upload a text-based PDF, TXT, Markdown or DOCX; wait for actual index completion.
-7. Create a chatbot assigned to that knowledgebase.
-8. Go to **Live Chat**, choose the bot and ask a question actually supported by the uploaded data.
-9. Verify the response and source excerpt; compare page/heading against the source PDF.
-10. Ask an unsupported question and verify fallback. Refresh browser and verify History.
-11. Register a second account and ensure it cannot view the first account's company data.
+4. Upload and index an authorized document.
+5. Create a chatbot connected to the knowledgebase.
+6. Open the chat interface.
+7. Ask questions about indexed information.
+8. Review responses and source citations.
+9. Check saved conversation history.
 
-### Verify with curl or API docs
+## Medical RAG Research Use Case
 
-`GET /health` requires no login. All other business data operations require `Authorization: Bearer <access_token>`.
+The initial medical research workflow uses public clinical guideline documents.
 
-## API routes
+A local development test indexed the WHO hypertension guideline into 208 text chunks.
 
-| Endpoint | Description |
+This confirms a recorded ingestion result, but does not establish retrieval accuracy, medical answer correctness, or production readiness.
+
+### Research Requirements
+
+- Clinical guideline ingestion
+- Text chunking and embedding generation
+- Similarity-based passage retrieval
+- Context-grounded answer generation
+- Document, page, and section citations
+- Relevance thresholds
+- Invalid and empty query handling
+- Unsupported-question fallback
+- Retrieval and answer evaluation
+- Response-time measurement
+- Documented limitations
+
+## Evaluation Methodology
+
+A complete evaluation requires a labeled medical question dataset with manually verified reference passages and answers.
+
+Recommended metrics:
+
+| Metric | Purpose |
 |---|---|
-| POST `/api/auth/register`, `/api/auth/login` | Account and tokens |
-| GET `/api/me` | User profile |
-| GET/POST `/api/companies` | List/create company |
-| PATCH `/api/companies/{company_id}` | Update company profile |
-| GET/POST `/api/companies/{company_id}/knowledgebases` | Collections |
-| GET/POST `/api/companies/{company_id}/bots` | Chatbot records |
-| GET/POST `/api/companies/{company_id}/documents` | Uploaded documents |
-| DELETE `/api/companies/{company_id}/documents/{document_id}` | Remove document + vectors |
-| GET/POST/PATCH `/api/companies/{company_id}/products` | Catalogue |
-| DELETE `/api/companies/{company_id}/products/{product_id}` | Delete catalogue entry + vectors |
-| POST `/api/companies/{company_id}/sync-profile?kb_id=...` | Index company profile |
-| POST `/api/chat` | Tenant-scoped real RAG |
-| GET `/api/companies/{company_id}/conversations` | Conversation list |
-| GET `/api/companies/{company_id}/conversations/{conversation_id}` | Conversation messages |
+| Recall@K | Whether relevant passages are retrieved |
+| Precision@K | Relevance of retrieved passages |
+| MRR | Rank of the first relevant result |
+| Answer correctness | Accuracy against reference answers |
+| Faithfulness | Whether claims are supported by sources |
+| Citation accuracy | Correct document, page, and section |
+| Fallback accuracy | Rejection of unsupported questions |
+| Response latency | Processing and generation time |
 
-### Example live RAG request
+The current code provides basic retrieval and per-request timing. A complete automated evaluation pipeline is not yet verified.
 
-```json
-{
-  "company_id": "<real-company-uuid>",
-  "knowledgebase_id": "<real-kb-uuid>",
-  "bot_id": "<real-bot-uuid>",
-  "question": "What are the return policies?",
-  "top_k": 5
-}
-```
+## Security Considerations
 
-Response fields: `answer`, `status`, `citations`, `conversation_id`, `response_time_ms`.
+The application includes basic JWT authentication and organization ownership checks.
 
-## Technical notes
+Before production deployment, additional security work is required:
 
-- Similarity is `1 - cosine_distance` for ChromaDB cosine space; `MIN_SIMILARITY=0.45` is a **starting placeholder**, not a validated threshold.
-- Stored citations use document metadata from ingestion; image-only scanned PDFs currently return an explicit no-text error.
-- PDF heading extraction is heuristic. Page citations are PDF physical pages, not necessarily printed page numbering.
-- Catalogue products and company profile values are indexed separately; adding them makes facts searchable, but the model can still make mistakes. Always validate numerical product prices/availability against the canonical SQL record before production display.
-- Company profile sync is manual after each profile edit; the next iteration should automatically handle updates.
-- Product editing and re-indexing are available in the connected workspace. Deletion and updates still require stronger transaction/reconciliation logic for production.
-- LLM answers are permitted only if the model references one or more available `[S#]` citations. This checks citation IDs, not whether every claim is actually entailed by those excerpts. Medical evaluation is still required.
-- Login token is stored in browser sessionStorage solely for alpha convenience. Replace with secure authentication in production.
-- There is no public/anonymous chatbot endpoint: the live chat requires an owner token. An embeddable widget is a **future product phase**.
+- Role-based access control
+- Tenant isolation tests
+- Rate limiting
+- Secure API key management
+- Input and upload security
+- Prompt-injection testing
+- Audit logging
+- HTTPS
+- Database backups
+- Data retention and deletion policies
+- Appropriate privacy and medical compliance review
 
-## What do we mean by 'our own API' vs provider API?
+Use public or explicitly authorized, non-sensitive documents for local research testing.
 
-**Our own API** = FastAPI endpoints, business logic, document ingestion, vector retrieval, security, chat orchestration and DB. We control it.
+## Known Limitations
 
-**Model API** = Google Gemini/OpenAI token for access to a hosted LLM. The model weights are not ours; the provider handles generation. We can later replace it with a local model (e.g. an open-weight model hosted via an inference server) without changing the client's interface if the adapter is extended.
+1. Scanned PDFs require OCR support.
+2. PDF heading detection is heuristic.
+3. Similarity thresholds require calibration.
+4. Retrieved evidence may not always be relevant.
+5. LLM-generated answers may contain unsupported claims.
+6. Citation identifiers alone do not prove factual accuracy.
+7. Multi-turn conversational reasoning needs improvement.
+8. Automated medical evaluation is incomplete.
+9. Production security controls need additional development.
+10. Super Admin, billing, and advanced team permissions are not fully implemented.
 
-**Embeddings** = local Sentence Transformers model; no embedding API token is needed in the current setup (initial model download requires internet).
+## Future Improvements
 
-## Roadmap to production
+- PostgreSQL migration
+- Hybrid search and reranking
+- Improved citation grounding
+- Source document preview
+- Conversation-aware retrieval
+- Automated RAG evaluation
+- Production-grade multi-tenant permissions
+- Website chatbot embedding
+- Usage analytics and monitoring
+- Background document processing
 
-1. Real team roles, organization membership, separate platform admin authentication and invitation flows.
-2. PostgreSQL, Alembic migrations, object storage, queues and backups.
-3. Permissioned website/FAQ and CSV/JSON catalogue connectors; incremental re-indexing; schema-based company knowledge.
-4. Citations with clickable document view, per-claim verification and calibrated abstention/evaluation.
-5. Production-ready website widget + domain allowlisting + per-tenant rate limiting + abuse controls.
-6. Billing, usage quotas, subscription plan enforcement, token accounting and provider cost controls.
-7. Medical-specific safety assessment, governance, data privacy and deployment security review.
-8. CI tests, automated metrics dashboards, tracing and evaluation datasets.
+## Disclaimer
 
+MediRAG AI is a research and development project. Its medical guideline assistant is intended for document exploration and is not a substitute for professional medical diagnosis, treatment, or emergency care.
+
+## Project Status
+
+**Active Development**
+
+Document ingestion, knowledgebase retrieval, and the full-stack application structure are implemented. LLM generation, complete medical evaluation, advanced security, and production deployment require further verification and development.
