@@ -1,13 +1,40 @@
+
+# Python
 .venv/
-node_modules/
-.next/
 __pycache__/
+*.pyc
+.pytest_cache/
+
+# Environment and secrets
 .env
 .env.*
 !.env.example
+*.pem
+*.key
+
+# Database and uploaded documents
 *.db
+*.db-*
 *.sqlite
 *.sqlite3
 storage/
 uploads/
 chroma/
+
+# Retrieval evaluation results
+retrieval_eval/
+retrieval_eval_filtered/
+
+# Next.js
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+
+# Logs
+*.log
+
+# OS and editor
+.DS_Store
+Thumbs.db
+.vscode/
