@@ -1,108 +1,163 @@
+# MediRAG AI — Multi-Tenant RAG Chatbot Platform
 
-# MediRAG AI — Dynamic RAG Chatbot Platform
+**An intelligent, source-grounded AI chatbot platform for organizational knowledge, document research, and conversational assistance.**
 
-A full-stack, multi-organization Retrieval-Augmented Generation (RAG) chatbot application built with Next.js, FastAPI, SQLAlchemy, ChromaDB, Sentence Transformers, and configurable large language model APIs.
+MediRAG AI is a full-stack Retrieval-Augmented Generation (RAG) platform built with Next.js, FastAPI, SQLAlchemy, ChromaDB, Sentence Transformers, and configurable LLM providers.
 
-MediRAG AI allows organizations to manage knowledgebases, upload documents, configure AI assistants, and ask questions grounded in their own information.
+The platform enables organizations to manage their knowledgebases, upload documents, maintain product catalogues, configure AI assistants, and interact with their information through natural-language conversations.
 
-The initial research use case focuses on clinical guidelines and evidence-based medical question answering.
+Its initial research application focuses on **clinical guideline retrieval and evidence-based medical question answering**.
 
-## Features
+**Project Status:** Active Development — MediRAG Chat V3
 
-- User registration and authentication
-- Organization and company profile management
-- Knowledgebase creation
+**Repository:** [github.com/145zameerhassanshah/medirag-ai](https://github.com/145zameerhassanshah/medirag-ai)
+
+---
+
+## Key Features
+
+### Organization and Knowledge Management
+
+- User registration and JWT authentication
+- Multi-organization workspace
+- Organization profile management
+- Knowledgebase creation and management
 - PDF, DOCX, TXT, and Markdown document ingestion
-- Automatic text extraction and chunking
-- Local embedding generation using Sentence Transformers
-- ChromaDB vector storage and similarity search
-- Configurable Gemini or OpenAI answer generation
-- Source citations with document, page, and section metadata
-- Relevance filtering and unsupported-answer fallback
-- Empty-query validation
-- Product catalogue management
-- Saved chat conversations and messages
-- Responsive Next.js admin workspace
+- Automatic text extraction, chunking, and embeddings
+- ChromaDB vector indexing
+- Structured product catalogue management
+- Company information indexing
+
+### AI Chatbot and Conversations
+
+- Configurable AI assistants
+- Natural-language document question answering
+- Gemini and OpenAI provider integration
+- Source-grounded answers with citations
+- Friendly greeting and out-of-scope responses
+- Recent conversation context for follow-up questions
+- Conversation history and session continuation
+- Conversation rename and delete
+- Chat history panel inside the Live Chat workspace
+- Markdown-formatted responses
+- Collapsible source references
+- Loading and answer-generation indicators
+- Responsive chat interface
+
+### RAG and Retrieval
+
+- Local embeddings using Sentence Transformers
+- Semantic similarity search using ChromaDB
+- Configurable retrieval thresholds
+- Configurable Top-K retrieval
+- Source and metadata tracking
+- Retrieval candidate filtering
+- Heuristic prioritization of relevant guideline passages
+- Source-supported answer generation
+- Fallback when sufficient evidence is unavailable
+- Retrieval evaluation scripts for comparing search configurations
+
+### Optional External Search
+
+MediRAG supports a configurable external web-search integration through Tavily.
+
+The default mode uses organization-owned knowledgebases. External search requires separate API configuration and should be explicitly enabled.
+
+Externally retrieved information must be distinguished from organization documents.
+
+---
 
 ## Technology Stack
 
-### Frontend
-- Next.js
-- React
-- TypeScript
-- Responsive CSS
+| Component | Technology |
+|---|---|
+| Frontend | Next.js, React, TypeScript |
+| Backend | Python, FastAPI |
+| Data validation | Pydantic |
+| Database ORM | SQLAlchemy |
+| Authentication | JWT |
+| Development database | SQLite |
+| Vector database | ChromaDB |
+| Embeddings | Sentence Transformers |
+| PDF processing | PyMuPDF |
+| AI generation | Google Gemini / OpenAI |
+| Optional web search | Tavily |
 
-### Backend
-- Python
-- FastAPI
-- Pydantic
-- SQLAlchemy
-- JWT authentication
+PostgreSQL, production object storage, advanced authorization, and scalable deployment infrastructure are planned enhancements.
 
-### AI and Retrieval
-- Sentence Transformers
-- ChromaDB
-- Cosine similarity search
-- Google Gemini or OpenAI API
-- PyMuPDF for PDF extraction
+---
 
-### Storage
-- SQLite for local development
-- ChromaDB for vector embeddings
-- Local document storage
-
-PostgreSQL, production object storage, and additional access controls are planned improvements.
-
-## RAG Architecture
+## System Architecture
 
 ```text
-User Question
-     |
-     v
-Next.js Chat Interface
-     |
-     v
-FastAPI Backend
-     |
-     v
-Input Validation
-     |
-     v
-Question Embedding
-     |
-     v
-ChromaDB Similarity Search
-     |
-     v
-Relevance Filtering
-     |
-     v
-Retrieved Document Context
-     |
-     v
-Gemini / OpenAI
-     |
-     v
-Source-Grounded Answer
-     |
-     v
-Citations + Chat History
+                  USER / ORGANIZATION
+                           |
+                           v
+                    Next.js Frontend
+                           |
+                           v
+                     FastAPI Backend
+                           |
+               Authentication and Validation
+                           |
+                           v
+                  Conversation Processing
+                           |
+              +------------+------------+
+              |                         |
+              v                         v
+       Greeting / Simple         Knowledge Question
+         Response Router                |
+              |                         v
+              |                  Query Processing
+              |                         |
+              |                         v
+              |                 Embedding Generation
+              |                         |
+              |                         v
+              |                 ChromaDB Retrieval
+              |                         |
+              |                         v
+              |                 Relevance Filtering
+              |                         |
+              |                         v
+              |                Retrieved Evidence
+              |                         |
+              |                         v
+              |                 Gemini / OpenAI
+              |                         |
+              +------------+------------+
+                           |
+                           v
+                  Grounded AI Response
+                           |
+                           v
+               Citations and Chat History
 ```
+
+Optional web search is handled separately when enabled and configured.
+
+---
 
 ## Project Structure
 
 ```text
-medirag_fullstack/
+medirag-ai/
 |
 |-- backend/
 |   |-- main.py
 |   |-- requirements.txt
+|   |-- tests_smoke.py
+|   |-- evaluate_retrieval.py
 |   |-- .env.example
-|   |-- storage/           # Local data; excluded from Git
+|   |-- storage/             # Local data, ignored by Git
 |
 |-- frontend/
 |   |-- src/
 |   |   |-- app/
+|   |   |   |-- live/
+|   |   |   |   |-- page.tsx
+|   |   |-- components/
 |   |-- package.json
 |   |-- .env.example
 |
@@ -110,20 +165,30 @@ medirag_fullstack/
 |-- .gitignore
 ```
 
-## Local Installation
+Some development and evaluation files may be maintained locally and are not necessarily included in every repository revision.
 
-### 1. Clone the Repository
+---
+
+## Getting Started
+
+### Prerequisites
+
+- Python 3.12 recommended
+- Node.js compatible with the installed Next.js version
+- npm
+- Git
+- Google Gemini API key or OpenAI API key
+
+### 1. Clone Repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/medirag-ai.git
+git clone https://github.com/145zameerhassanshah/medirag-ai.git
 cd medirag-ai
 ```
 
-### 2. Configure the Backend
+### 2. Backend Setup
 
-Recommended Python version: 3.12.
-
-On Windows PowerShell:
+Open PowerShell in the `backend` directory.
 
 ```powershell
 cd backend
@@ -135,29 +200,43 @@ python -m venv .venv
 python -m pip install -r requirements.txt
 ```
 
-Create the environment configuration:
+If PowerShell blocks activation, for the current terminal session:
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+```
+
+Then activate the environment again.
+
+### 3. Backend Environment Variables
+
+Create the environment file:
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-Configure the required variables:
+Configure `backend/.env`:
 
 ```env
 DATABASE_URL=sqlite:///./medirag.db
 
-JWT_SECRET=GENERATE_A_LONG_RANDOM_SECRET
+JWT_SECRET=YOUR_LONG_RANDOM_SECRET
 
 LLM_PROVIDER=gemini
-GEMINI_API_KEY=YOUR_PRIVATE_API_KEY
-GEMINI_MODEL=gemini-2.5-flash
+GEMINI_API_KEY=YOUR_PRIVATE_GEMINI_API_KEY
+GEMINI_MODEL=gemini-3.1-flash-lite
 
 EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
 
 MIN_SIMILARITY=0.45
 
 CORS_ORIGINS=http://localhost:3000
+
+WEB_SEARCH_ENABLED=false
 ```
+
+The Gemini model shown above was successfully tested during local development. Model availability and quotas depend on the provider and account.
 
 Generate a JWT secret:
 
@@ -165,25 +244,38 @@ Generate a JWT secret:
 python -c "import secrets; print(secrets.token_urlsafe(48))"
 ```
 
-Copy the generated secret into `backend/.env`.
+Copy the generated secret into `.env`.
 
-Never commit API keys or `.env` files to GitHub.
+**Never commit `.env` files, API keys, or JWT secrets.**
 
-### 3. Start the Backend
+### 4. Optional Web Search
+
+To enable the Tavily integration, configure:
+
+```env
+WEB_SEARCH_ENABLED=true
+TAVILY_API_KEY=YOUR_PRIVATE_TAVILY_API_KEY
+```
+
+A valid Tavily API key is required. Keep external search disabled for document-only testing.
+
+### 5. Start Backend
 
 ```powershell
+python -m py_compile main.py
+
 python -m uvicorn main:app --reload --host 127.0.0.1 --port 8000
 ```
 
 Backend API documentation:
 
-http://127.0.0.1:8000/docs
+`http://127.0.0.1:8000/docs`
 
 Health endpoint:
 
-http://127.0.0.1:8000/health
+`http://127.0.0.1:8000/health`
 
-### 4. Configure the Frontend
+### 6. Frontend Setup
 
 Open another terminal:
 
@@ -193,119 +285,203 @@ cd frontend
 npm install
 
 Copy-Item .env.example .env.local
+```
 
+Configure the API address if needed:
+
+```env
+NEXT_PUBLIC_RAG_API_BASE_URL=http://127.0.0.1:8000
+```
+
+Start the frontend:
+
+```powershell
 npm run dev
 ```
 
-Frontend:
+Open the application:
 
-http://localhost:3000/live
+`http://localhost:3000/live`
 
-## Usage
+---
 
-1. Register or sign in.
-2. Create an organization/company profile.
-3. Create a knowledgebase.
-4. Upload and index an authorized document.
-5. Create a chatbot connected to the knowledgebase.
-6. Open the chat interface.
-7. Ask questions about indexed information.
-8. Review responses and source citations.
-9. Check saved conversation history.
+## How to Use MediRAG
 
-## Medical RAG Research Use Case
+1. Register an account or sign in.
+2. Create or select an organization.
+3. Configure the organization profile.
+4. Create a knowledgebase.
+5. Upload and index authorized documents.
+6. Create an AI assistant connected to the knowledgebase.
+7. Open Live Chat.
+8. Ask a question about the indexed information.
+9. Review the AI answer and supporting citations.
+10. Open a previous conversation to continue the session.
 
-The initial medical research workflow uses public clinical guideline documents.
+For example:
 
-A local development test indexed the WHO hypertension guideline into 208 text chunks.
+**Question:** What does WHO recommend about starting antihypertensive treatment?
 
-This confirms a recorded ingestion result, but does not establish retrieval accuracy, medical answer correctness, or production readiness.
+**Expected behavior:** The chatbot retrieves relevant passages from the uploaded WHO guideline, generates an answer, and displays supporting document references.
 
-### Research Requirements
+If sufficient evidence is unavailable, the assistant should avoid inventing an answer.
 
-- Clinical guideline ingestion
-- Text chunking and embedding generation
-- Similarity-based passage retrieval
-- Context-grounded answer generation
-- Document, page, and section citations
-- Relevance thresholds
-- Invalid and empty query handling
-- Unsupported-question fallback
-- Retrieval and answer evaluation
-- Response-time measurement
-- Documented limitations
+---
 
-## Evaluation Methodology
+## Clinical RAG Research
 
-A complete evaluation requires a labeled medical question dataset with manually verified reference passages and answers.
+The original research use case evaluates a medical guideline assistant using public WHO hypertension guidance.
 
-Recommended metrics:
+During local development, the WHO hypertension guideline was indexed into **208 vector chunks**.
+
+This demonstrates successful ingestion and indexing, but does not by itself prove answer correctness or retrieval accuracy.
+
+### Retrieval Quality Experiments
+
+The evaluation workflow compares:
+
+- Top-K: 3, 5, and 10
+- Similarity thresholds: 0.30, 0.45, and 0.60
+- Clinical and unrelated test questions
+- Retrieved document passages
+- Similarity scores
+- Page and section metadata
+- Retrieval latency
+
+Experiments identified weaknesses including title-only passages receiving high similarity scores, indirect evidence retrieval, and answer-bearing passages being missed for some queries.
+
+These findings motivated retrieval filtering and conversation-aware search improvements.
+
+### Evaluation Metrics
 
 | Metric | Purpose |
 |---|---|
-| Recall@K | Whether relevant passages are retrieved |
-| Precision@K | Relevance of retrieved passages |
-| MRR | Rank of the first relevant result |
-| Answer correctness | Accuracy against reference answers |
-| Faithfulness | Whether claims are supported by sources |
-| Citation accuracy | Correct document, page, and section |
-| Fallback accuracy | Rejection of unsupported questions |
-| Response latency | Processing and generation time |
+| Precision@K | Proportion of retrieved results that are relevant |
+| Recall@K | Proportion of known relevant results retrieved |
+| MRR | Ranking quality of the first relevant result |
+| Answer correctness | Comparison with reference answers |
+| Faithfulness | Whether generated claims are supported |
+| Citation accuracy | Correct source and page references |
+| Fallback accuracy | Handling of unsupported questions |
+| Latency | Retrieval and generation response time |
 
-The current code provides basic retrieval and per-request timing. A complete automated evaluation pipeline is not yet verified.
+Manual reference annotations are required before reporting reliable quantitative retrieval accuracy.
 
-## Security Considerations
+---
 
-The application includes basic JWT authentication and organization ownership checks.
+## Security and Privacy
 
-Before production deployment, additional security work is required:
+MediRAG includes basic authentication and company ownership checks.
+
+Additional work is required before use with sensitive customer or clinical records:
 
 - Role-based access control
-- Tenant isolation tests
-- Rate limiting
-- Secure API key management
-- Input and upload security
-- Prompt-injection testing
-- Audit logging
-- HTTPS
-- Database backups
+- Multi-user team permissions
+- Tenant-isolation testing
+- Request rate limiting
+- Secure session management
+- API key and secret management
+- Prompt-injection defenses
+- File upload validation
+- Encryption and secure storage
+- Audit logs
+- HTTPS deployment
+- Backup and recovery
 - Data retention and deletion policies
-- Appropriate privacy and medical compliance review
+- Compliance review appropriate to the deployment
 
-Use public or explicitly authorized, non-sensitive documents for local research testing.
+Only public or properly authorized documents should be used during development.
+
+---
 
 ## Known Limitations
 
-1. Scanned PDFs require OCR support.
-2. PDF heading detection is heuristic.
-3. Similarity thresholds require calibration.
-4. Retrieved evidence may not always be relevant.
-5. LLM-generated answers may contain unsupported claims.
-6. Citation identifiers alone do not prove factual accuracy.
-7. Multi-turn conversational reasoning needs improvement.
-8. Automated medical evaluation is incomplete.
-9. Production security controls need additional development.
-10. Super Admin, billing, and advanced team permissions are not fully implemented.
+MediRAG is under active development.
 
-## Future Improvements
+- AI answers are not guaranteed to be accurate.
+- Retrieved chunks may be semantically similar but not sufficient to answer a question.
+- PDF heading extraction is heuristic.
+- Scanned documents require OCR support.
+- Multi-turn context is limited and requires further evaluation.
+- Clinical citation and answer accuracy are not fully validated.
+- LLM response latency depends on model availability, network performance, and prompt size.
+- Web-search results require their own source-quality checks.
+- Complete message editing and answer regeneration are not yet verified.
+- Advanced token usage analytics, billing, and quotas are not fully implemented.
+- Production security, monitoring, and automated deployment require further work.
 
-- PostgreSQL migration
-- Hybrid search and reranking
-- Improved citation grounding
-- Source document preview
-- Conversation-aware retrieval
-- Automated RAG evaluation
-- Production-grade multi-tenant permissions
-- Website chatbot embedding
-- Usage analytics and monitoring
-- Background document processing
+---
 
-## Disclaimer
+## Development Roadmap
 
-MediRAG AI is a research and development project. Its medical guideline assistant is intended for document exploration and is not a substitute for professional medical diagnosis, treatment, or emergency care.
+### Phase 1 — Core Platform
+
+- Authentication and organization management
+- Document ingestion
+- Embedding generation
+- Vector retrieval
+- Knowledgebase-connected assistants
+- Grounded answer generation
+
+### Phase 2 — Conversational Experience
+
+- Improved Live Chat interface
+- Conversation history panel
+- Conversation rename/delete
+- Markdown rendering
+- Source presentation
+- Friendly response handling
+- Limited multi-turn context
+
+### Phase 3 — Retrieval and Quality
+
+- Better document chunking
+- Hybrid semantic and keyword search
+- Reranking
+- Evaluation datasets
+- Faithfulness checks
+- Retrieval quality monitoring
+
+### Phase 4 — SaaS Capabilities
+
+- Secure embeddable chatbot widget
+- Organization team roles
+- Visitor sessions
+- Usage and token accounting
+- API rate limiting
+- Subscription and billing infrastructure
+- Human handoff
+- Multi-language support
+- Admin analytics
+
+### Phase 5 — Production Infrastructure
+
+- PostgreSQL and object storage
+- Background processing
+- Scalable vector infrastructure
+- Automated testing and CI/CD
+- Monitoring and alerting
+- Security audits
+- Deployment documentation
+
+These phases represent development priorities, not guarantees that all listed features are complete.
+
+---
+
+## Medical Disclaimer
+
+MediRAG AI is a research and development application intended to help users explore and retrieve information from authorized documents.
+
+The clinical guideline assistant is **not a medical device** and must not be used as a substitute for professional diagnosis, treatment decisions, emergency services, or qualified clinical judgment.
+
+Medical recommendations must be checked against the original source documents and current clinical guidance.
+
+---
 
 ## Project Status
 
-**Active Development**
+**MediRAG AI — Active Development (Chat V3)**
 
-Document ingestion, knowledgebase retrieval, and the full-stack application structure are implemented. LLM generation, complete medical evaluation, advanced security, and production deployment require further verification and development.
+The application includes a working full-stack RAG foundation, organization-based knowledge management, source-grounded document question answering, and an evolving conversational interface.
+
+The current development focus is retrieval accuracy, natural multi-turn conversation, response speed, source verification, and production-oriented SaaS capabilities.
