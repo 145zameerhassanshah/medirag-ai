@@ -6,8 +6,6 @@ __pycache__/
 .pytest_cache/
 
 # Environment and secrets
-.env
-.env.*
 !.env.example
 *.pem
 *.key
@@ -37,4 +35,4 @@ out/
 # OS and editor
 .DS_Store
 Thumbs.db
-.vscode/
+config.bat
